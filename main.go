@@ -36,11 +36,11 @@ func main() {
 
 		resp := apiResponse{
 			Ok:     true,
-			Checks: make([]*check, 0),
+			Checks: make(map[string]*check),
 		}
 		for _, cs := range checkSets {
 			for _, c := range cs.checks {
-				resp.Checks = append(resp.Checks, c)
+				resp.Checks[c.Name] = c
 				if c.Status == statusFailed {
 					resp.Ok = false
 				}
@@ -66,6 +66,6 @@ func main() {
 }
 
 type apiResponse struct {
-	Ok     bool     `json:"ok"`
-	Checks []*check `json:"checks"`
+	Ok     bool              `json:"ok"`
+	Checks map[string]*check `json:"checks"`
 }
