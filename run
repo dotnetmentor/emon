@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+go run main.go http_client.go checks.go gossip_checks.go

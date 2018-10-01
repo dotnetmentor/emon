@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  eventstore1:
+    image: eventstore/eventstore:release-4.1.1-hotfix1
+    ports:
+    - 12113:2113/tcp
+    - 11113:1113/tcp
+    environment:
+      EVENTSTORE_CLUSTER_DNS: eventstore1
+      EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
+      EVENTSTORE_CLUSTER_SIZE: '3'
+      EVENTSTORE_EXT_HTTP_PORT_ADVERTISE_AS: '12113'
+      EVENTSTORE_EXT_TCP_PORT_ADVERTISE_AS: '11113'
+      EVENTSTORE_EXT_IP: '127.0.0.1'
+      EVENTSTORE_EXT_IP_ADVERTISE_AS: '127.0.0.1'
+      EVENTSTORE_RUN_PROJECTIONS: None
+      EVENTSTORE_START_STANDARD_PROJECTIONS: 'True'
+    entrypoint:
+    - /bin/bash
+    command:
+    - -c
+    - 'sed -i "/IntIpAdvertiseAs\:/d" /etc/eventstore/eventstore.conf && echo "IntIpAdvertiseAs: $$(hostname -i)" >> /etc/eventstore/eventstore.conf && sed -i "/IntIp\:/d" /etc/eventstore/eventstore.conf && echo "IntIp: $$(hostname -i)" >> /etc/eventstore/eventstore.conf && /entrypoint.sh'
+
+  eventstore2:
+    image: eventstore/eventstore:release-4.1.1-hotfix1
+    ports:
+    - 22113:2113/tcp
+    - 21113:1113/tcp
+    environment:
+      EVENTSTORE_CLUSTER_DNS: eventstore1
+      EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
+      EVENTSTORE_CLUSTER_SIZE: '3'
+      EVENTSTORE_EXT_HTTP_PORT_ADVERTISE_AS: '22113'
+      EVENTSTORE_EXT_TCP_PORT_ADVERTISE_AS: '21113'
+      EVENTSTORE_EXT_IP: '127.0.0.1'
+      EVENTSTORE_EXT_IP_ADVERTISE_AS: '127.0.0.1'
+      EVENTSTORE_RUN_PROJECTIONS: None
+      EVENTSTORE_START_STANDARD_PROJECTIONS: 'True'
+    entrypoint:
+    - /bin/bash
+    command:
+    - -c
+    - 'sed -i "/IntIpAdvertiseAs\:/d" /etc/eventstore/eventstore.conf && echo "IntIpAdvertiseAs: $$(hostname -i)" >> /etc/eventstore/eventstore.conf && sed -i "/IntIp\:/d" /etc/eventstore/eventstore.conf && echo "IntIp: $$(hostname -i)" >> /etc/eventstore/eventstore.conf && /entrypoint.sh'
+
+  eventstore3:
+    image: eventstore/eventstore:release-4.1.1-hotfix1
+    ports:
+    - 32113:2113/tcp
+    - 31113:1113/tcp
+    environment:
+      EVENTSTORE_CLUSTER_DNS: eventstore1
+      EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
+      EVENTSTORE_CLUSTER_SIZE: '3'
+      EVENTSTORE_EXT_HTTP_PORT_ADVERTISE_AS: '32113'
+      EVENTSTORE_EXT_TCP_PORT_ADVERTISE_AS: '31113'
+      EVENTSTORE_EXT_IP: '127.0.0.1'
+      EVENTSTORE_EXT_IP_ADVERTISE_AS: '127.0.0.1'
+      EVENTSTORE_RUN_PROJECTIONS: None
+      EVENTSTORE_START_STANDARD_PROJECTIONS: 'True'
+    entrypoint:
+    - /bin/bash
+    command:
+    - -c
+    - 'sed -i "/IntIpAdvertiseAs\:/d" /etc/eventstore/eventstore.conf && echo "IntIpAdvertiseAs: $$(hostname -i)" >> /etc/eventstore/eventstore.conf && sed -i "/IntIp\:/d" /etc/eventstore/eventstore.conf && echo "IntIp: $$(hostname -i)" >> /etc/eventstore/eventstore.conf && /entrypoint.sh'
