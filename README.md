@@ -10,3 +10,12 @@ Eventstore monitoring over HTTP
 docker-compose up -d
 ./run
 ```
+
+## Releasing
+
+Pre-requisites:
+- [goreleaser](https://goreleaser.com/)
+- A github token
+
+```bash
+goreleaser --rm-dist
