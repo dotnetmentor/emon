@@ -1,6 +1,8 @@
 # emon
 
-Eventstore monitoring daemon
+Eventstore monitoring over HTTP
+
+**NOTE: NOT ready for production!!!**
 
 ## Development
 
