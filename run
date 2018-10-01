@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 export EMON_HTTP_BIND_ADDRESS=':8113'
+export EMON_CLUSTER_HTTP_ENDPOINT='http://localhost:12113'
 export EMON_CLUSTER_SIZE=3
 
 go run main.go http_client.go checks.go gossip_checks.go healthchecks.go config.go

@@ -57,7 +57,11 @@ func main() {
 		}).Infof("HTTP %s %s - %s", r.Method, r.RequestURI, http.StatusText(status))
 	})
 
-	log.Infof("emon started (%s)", config.EmonHTTPBindAddress)
+	log.WithFields(log.Fields{
+		"EmonHTTPBindAddress": config.EmonHTTPBindAddress,
+		"ClusterHTTPEndpoint": config.ClusterHTTPEndpoint,
+		"ClusterSize":         config.ClusterSize,
+	}).Infof("emon started")
 	http.ListenAndServe(config.EmonHTTPBindAddress, nil)
 }
 

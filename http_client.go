@@ -10,8 +10,6 @@ import (
 	"github.com/apex/log"
 )
 
-const defaultNodeURL string = "http://localhost:2113"
-
 type esHTTPClient struct {
 	BaseURL     string
 	ContentType string
@@ -33,11 +31,7 @@ type gossipMember struct {
 type errorResponse struct {
 }
 
-func newClient(nodeURL string) *esHTTPClient {
-	baseURL := defaultNodeURL
-	if nodeURL != "" {
-		baseURL = nodeURL
-	}
+func newClient(baseURL string) *esHTTPClient {
 	return &esHTTPClient{
 		BaseURL:     baseURL,
 		ContentType: "application/json",

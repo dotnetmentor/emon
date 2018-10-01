@@ -7,7 +7,7 @@ import (
 )
 
 func checkHealth() ([]*checkSet, int) {
-	client := newClient("http://localhost:12113")
+	client := newClient(config.ClusterHTTPEndpoint)
 	checks := make([]*checkSet, 0)
 
 	gossipChecks := createCheckSet("gossip")
