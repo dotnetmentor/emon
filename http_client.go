@@ -61,12 +61,7 @@ func (c *esHTTPClient) request(method string, path string, reader io.Reader) ([]
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode >= 300 {
-		errorResp := new(errorResponse)
-		if err = json.Unmarshal(body, &errorResp); err != nil {
-			return nil, fmt.Errorf("%s. %s %s >> %s", err, method, url, resp.Status)
-		}
-
-		return nil, fmt.Errorf("%s. %s %s >> %s", "TODO: errorResp.Message", method, url, resp.Status)
+		return nil, fmt.Errorf("%s %s - %s", method, url, resp.Status)
 	}
 
 	return body, err

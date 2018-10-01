@@ -12,10 +12,10 @@ type checkSet struct {
 }
 
 type check struct {
-	name   string
-	status string
-	reason string
-	data   string
+	Name   string `json:"name,omitempty"`
+	Status string `json:"status,omitempty"`
+	Reason string `json:"reason,omitempty"`
+	Data   string `json:"data,omitempty"`
 }
 
 func createCheckSet(name string) *checkSet {
@@ -28,8 +28,8 @@ func createCheckSet(name string) *checkSet {
 
 func (s *checkSet) createCheck(name string) *check {
 	c := &check{
-		name:   fmt.Sprintf("%s:%s", s.name, name),
-		status: statusSuccess,
+		Name:   fmt.Sprintf("%s:%s", s.name, name),
+		Status: statusSuccess,
 	}
 
 	s.checks = append(s.checks, c)
@@ -38,11 +38,11 @@ func (s *checkSet) createCheck(name string) *check {
 }
 
 func (c *check) fail(reason string) {
-	c.status = statusFailed
-	c.reason = reason
+	c.Status = statusFailed
+	c.Reason = reason
 }
 
 func (c *check) warn(reason string) {
-	c.status = statusWarning
-	c.reason = reason
+	c.Status = statusWarning
+	c.Reason = reason
 }

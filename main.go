@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"net/http"
 	"os"
 	"strings"
 
@@ -11,46 +13,55 @@ import (
 func main() {
 	log.SetHandler(text.New(os.Stderr))
 
-	client := newClient("http://localhost:12113")
-	gossipChecks := createCheckSet("gossip")
+	configureEmon()
 
-	// Do gossip checks
-	r, err := client.getGossip(gossipChecks)
-	if err == nil {
-		gossipChecks.doMasterCount(r)
-		gossipChecks.doSlaveCount(r)
-		gossipChecks.doAliveCount(r)
-	}
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.WithFields(log.Fields{
+			"method":    r.Method,
+			"path":      r.RequestURI,
+			"direction": "incoming",
+		}).Infof("HTTP %s %s", r.Method, r.RequestURI)
 
-	// Output checks
-	success := true
-	for _, c := range gossipChecks.checks {
-		topic := "gossip"
-		lm := log.WithFields(log.Fields{
-			"check":  strings.Replace(c.name, "gossip:", "", -1),
-			"reason": c.reason,
-			"status": c.status,
-			"data":   c.data,
-		})
-
-		switch c.status {
-		case statusSuccess:
-			lm.Info(topic)
-		case statusWarning:
-			lm.Warn(topic)
-		case statusFailed:
-			lm.Error(topic)
+		if strings.HasPrefix(r.RequestURI, "/favicon.ico") {
+			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 
-		if c.status != statusSuccess {
-			success = false
+		status := http.StatusOK
+
+		checkSets, code := checkHealth()
+		if code != 0 {
+			status = http.StatusFailedDependency
 		}
-	}
 
-	exitCode := 0
-	if !success {
-		exitCode = 1
-	}
+		resp := apiResponse{
+			Ok:     true,
+			Checks: make([]*check, 0),
+		}
+		for _, cs := range checkSets {
+			for _, c := range cs.checks {
+				resp.Checks = append(resp.Checks, c)
+				if c.Status == statusFailed {
+					resp.Ok = false
+				}
+			}
+		}
 
-	os.Exit(exitCode)
+		w.WriteHeader(status)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+
+		log.WithFields(log.Fields{
+			"status":    status,
+			"direction": "outgoing",
+		}).Infof("HTTP %s %s - %s", r.Method, r.RequestURI, http.StatusText(status))
+	})
+
+	log.Infof("emon started (%s)", config.EmonHTTPBindAddress)
+	http.ListenAndServe(config.EmonHTTPBindAddress, nil)
+}
+
+type apiResponse struct {
+	Ok     bool     `json:"ok"`
+	Checks []*check `json:"checks"`
 }
