@@ -63,3 +63,11 @@ services:
     command:
     - -c
     - 'sed -i "/IntIpAdvertiseAs\:/d" /etc/eventstore/eventstore.conf && echo "IntIpAdvertiseAs: $$(hostname -i)" >> /etc/eventstore/eventstore.conf && sed -i "/IntIp\:/d" /etc/eventstore/eventstore.conf && echo "IntIp: $$(hostname -i)" >> /etc/eventstore/eventstore.conf && /entrypoint.sh'
+
+  emon:
+    image: dotnetmentor/emon:latest
+    build: .
+    ports:
+      - "8113:8113"
+    environment:
+      EMON_CLUSTER_HTTP_ENDPOINT: http://eventstore1:2113
