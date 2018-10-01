@@ -1,0 +1,3 @@
+# emon
+
+Eventstore monitoring daemon
