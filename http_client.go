@@ -29,6 +29,21 @@ type gossipMember struct {
 	IsAlive    bool   `json:"isAlive"`
 }
 
+type statsResponse struct {
+	Proc statsProc `json:"proc"`
+	Sys  statsSys  `json:"sys"`
+}
+
+type statsProc struct {
+	CPU    float64 `json:"cpu"`
+	Memory float64 `json:"mem"`
+}
+
+type statsSys struct {
+	CPU        float64 `json:"cpu"`
+	FreeMemory float64 `json:"freeMem"`
+}
+
 type errorResponse struct {
 }
 
@@ -37,7 +52,7 @@ func newClient(baseURL string) *esHTTPClient {
 		BaseURL:     baseURL,
 		ContentType: "application/json",
 		HTTPClient: &http.Client{
-			Timeout: 1 * time.Second,
+			Timeout: 2 * time.Second,
 		},
 	}
 }
@@ -78,6 +93,12 @@ func (c *esHTTPClient) delete(path string) ([]byte, error) {
 
 func toGossipResponse(body []byte) (*gossipResponse, error) {
 	var s = new(gossipResponse)
+	err := json.Unmarshal(body, &s)
+	return s, err
+}
+
+func toStatsResponse(body []byte) (*statsResponse, error) {
+	var s = new(statsResponse)
 	err := json.Unmarshal(body, &s)
 	return s, err
 }

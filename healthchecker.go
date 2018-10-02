@@ -12,47 +12,62 @@ var monitor perfMon
 
 func runHealthchecks() ([]*checkSet, int) {
 	client := newClient(config.ClusterHTTPEndpoint)
-	checks := make([]*checkSet, 0)
+	checkSets := make([]*checkSet, 0)
 	monitor = perfMon{
 		name:    "checks",
 		results: make(map[string]time.Duration),
 	}
 
-	gossipChecks := createCheckSet("gossip")
-	checks = append(checks, gossipChecks)
+	gossip := createCheckSet("gossip")
+	checkSets = append(checkSets, gossip)
+
+	stats := createCheckSet("stats")
+	checkSets = append(checkSets, stats)
 
 	// Do gossip checks
-	r, err := client.getGossip(gossipChecks)
+	gr, err := client.getGossip(gossip)
 	if err == nil {
-		gossipChecks.doMasterCount(r)
-		gossipChecks.doSlaveCount(r)
-		gossipChecks.doAliveCount(r)
+		gossip.doMasterCount(gr)
+		gossip.doSlaveCount(gr)
+		gossip.doAliveCount(gr)
 	}
 
-	checks = append(checks, monitor.getCheckSet())
+	// Do stats checks
+	sr, err := client.getStats(stats)
+	if err == nil {
+		stats.doSysCPUCheck(sr)
+		stats.doSysMemoryCheck(sr)
+		stats.doProcCPUCheck(sr)
+		stats.doProcMemoryCheck(sr)
+	}
+
+	checkSets = append(checkSets, monitor.getCheckSet())
 
 	// Output checks
 	success := true
-	for _, c := range gossipChecks.checks {
-		topic := "gossip"
-		lm := log.WithFields(log.Fields{
-			"check":  strings.Replace(c.Name, "gossip:", "", -1),
-			"status": c.Status,
-			"data":   c.Data,
-			"output": c.Output,
-		})
 
-		switch c.Status {
-		case statusSuccess:
-			lm.Info(topic)
-		case statusWarning:
-			lm.Warn(topic)
-		case statusFailed:
-			lm.Error(topic)
-		}
+	for _, cs := range checkSets {
+		for _, c := range cs.checks {
+			topic := "gossip"
+			lm := log.WithFields(log.Fields{
+				"check":  strings.Replace(c.Name, "gossip:", "", -1),
+				"status": c.Status,
+				"data":   c.Data,
+				"output": c.Output,
+			})
 
-		if c.Status != statusSuccess {
-			success = false
+			switch c.Status {
+			case statusSuccess:
+				lm.Info(topic)
+			case statusWarning:
+				lm.Warn(topic)
+			case statusFailed:
+				lm.Error(topic)
+			}
+
+			if c.Status != statusSuccess {
+				success = false
+			}
 		}
 	}
 
@@ -61,7 +76,7 @@ func runHealthchecks() ([]*checkSet, int) {
 		exitCode = 1
 	}
 
-	return checks, exitCode
+	return checkSets, exitCode
 }
 
 type perfMon struct {
