@@ -7,8 +7,8 @@ import (
 )
 
 func (client *esHTTPClient) getGossip(set *checkSet) (*gossipResponse, error) {
-	defer monitor.track(time.Now(), "server_ip_port")
-	gossipCheck := set.createCheck("server_ip_port")
+	defer monitor.track(time.Now(), "collect_gossip")
+	gossipCheck := set.createCheck("collect_gossip")
 
 	body, err := client.get("/gossip")
 	if err != nil {
