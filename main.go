@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/text"
@@ -62,7 +63,13 @@ func main() {
 		"ClusterHTTPEndpoint": config.ClusterHTTPEndpoint,
 		"ClusterSize":         config.ClusterSize,
 	}).Infof("emon started")
-	http.ListenAndServe(config.EmonHTTPBindAddress, nil)
+
+	srv := &http.Server{
+		Addr:         config.EmonHTTPBindAddress,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	srv.ListenAndServe()
 }
 
 type apiResponse struct {
