@@ -12,10 +12,11 @@ type checkSet struct {
 }
 
 type check struct {
-	Name   string `json:"name,omitempty"`
-	Status string `json:"status,omitempty"`
-	Reason string `json:"reason,omitempty"`
-	Data   string `json:"data,omitempty"`
+	Name   string      `json:"-"`
+	Status string      `json:"status,omitempty"`
+	Reason string      `json:"reason,omitempty"`
+	Data   interface{} `json:"data,omitempty"`
+	Output string      `json:"output,omitempty"`
 }
 
 func createCheckSet(name string) *checkSet {

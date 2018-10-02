@@ -30,6 +30,7 @@ func runHealthchecks() ([]*checkSet, int) {
 			"reason": c.Reason,
 			"status": c.Status,
 			"data":   c.Data,
+			"output": c.Output,
 		})
 
 		switch c.Status {

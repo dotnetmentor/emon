@@ -37,7 +37,8 @@ func (cs *checkSet) doMasterCount(r *gossipResponse) {
 	}
 
 	check := cs.createCheck("alive_master")
-	check.Data = fmt.Sprintf("%d master node(s)", count)
+	check.Data = count
+	check.Output = fmt.Sprintf("%d master node(s)", count)
 	if count != 1 {
 		check.fail(fmt.Sprintf("Expected 1 master. Found %d.", count))
 	}
@@ -54,7 +55,8 @@ func (cs *checkSet) doSlaveCount(r *gossipResponse) {
 	}
 
 	check := cs.createCheck("alive_slaves")
-	check.Data = fmt.Sprintf("%d slave node(s)", count)
+	check.Data = count
+	check.Output = fmt.Sprintf("%d slave node(s)", count)
 	if count < failLevel {
 		check.fail(fmt.Sprintf("Expected at least %d slaves. Found %d.", failLevel, count))
 	} else if count < warnLevel {
@@ -73,7 +75,8 @@ func (cs *checkSet) doAliveCount(r *gossipResponse) {
 	}
 
 	check := cs.createCheck("alive_nodes")
-	check.Data = fmt.Sprintf("%d alive node(s)", count)
+	check.Data = count
+	check.Output = fmt.Sprintf("%d alive node(s)", count)
 	if count < failLevel {
 		check.fail(fmt.Sprintf("Expected at least %d alive nodes. Found %d.", failLevel, count))
 	} else if count < warnLevel {
