@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/apex/log"
 )
@@ -35,7 +36,9 @@ func newClient(baseURL string) *esHTTPClient {
 	return &esHTTPClient{
 		BaseURL:     baseURL,
 		ContentType: "application/json",
-		HTTPClient:  &http.Client{},
+		HTTPClient: &http.Client{
+			Timeout: 1 * time.Second,
+		},
 	}
 }
 
