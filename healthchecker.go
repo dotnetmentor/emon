@@ -33,7 +33,7 @@ func runHealthchecks() ([]*checkSet, int) {
 	}
 
 	// Do stats checks
-	sr, err := client.getStats(stats)
+	sr, err := client.getStats(stats, gr.ServerIP)
 	if err == nil {
 		stats.doSysCPUCheck(sr)
 		stats.doSysMemoryCheck(sr)

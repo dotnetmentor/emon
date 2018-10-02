@@ -6,6 +6,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/apex/log"
@@ -13,6 +16,8 @@ import (
 
 type esHTTPClient struct {
 	BaseURL     string
+	Port        int
+	Scheme      string
 	ContentType string
 	HTTPClient  *http.Client
 }
@@ -48,8 +53,16 @@ type errorResponse struct {
 }
 
 func newClient(baseURL string) *esHTTPClient {
+	u, _ := url.Parse(baseURL)
+	port, err := strconv.Atoi(u.Port())
+	if err != nil {
+		port = 80
+	}
+
 	return &esHTTPClient{
 		BaseURL:     baseURL,
+		Port:        port,
+		Scheme:      u.Scheme,
 		ContentType: "application/json",
 		HTTPClient: &http.Client{
 			Timeout: 2 * time.Second,
@@ -59,6 +72,9 @@ func newClient(baseURL string) *esHTTPClient {
 
 func (c *esHTTPClient) request(method string, path string, reader io.Reader) ([]byte, error) {
 	url := c.BaseURL + path
+	if strings.HasPrefix(path, "http") {
+		url = path
+	}
 	req, _ := http.NewRequest(method, url, reader)
 	req.Header.Set("Content-Type", c.ContentType)
 
