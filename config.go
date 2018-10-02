@@ -4,25 +4,29 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type emonConfig struct {
-	EmonHTTPBindAddress string
-	ClusterHTTPEndpoint string
-	ClusterSize         int
+	EmonHTTPBindAddress    string
+	EmonSlowCheckThreshold time.Duration
+	ClusterHTTPEndpoint    string
+	ClusterSize            int
 }
 
 var config *emonConfig
 
 func configureEmon() {
 	emonHTTPBindAddress := envOrDefault("EMON_HTTP_BIND_ADDRESS", ":8113")
+	emonSlowCheckThreshold, _ := time.ParseDuration(envOrDefault("EMON_SLOW_CHECK_THRESHOLD", "20ms"))
 	clusterSize, _ := strconv.Atoi(envOrDefault("EMON_CLUSTER_SIZE", "3"))
 	clusterHTTPEndpoint := envOrDefault("EMON_CLUSTER_HTTP_ENDPOINT", "http://localhost:2113")
 
 	config = &emonConfig{
-		EmonHTTPBindAddress: emonHTTPBindAddress,
-		ClusterSize:         clusterSize,
-		ClusterHTTPEndpoint: clusterHTTPEndpoint,
+		EmonHTTPBindAddress:    emonHTTPBindAddress,
+		EmonSlowCheckThreshold: emonSlowCheckThreshold,
+		ClusterSize:            clusterSize,
+		ClusterHTTPEndpoint:    clusterHTTPEndpoint,
 	}
 }
 

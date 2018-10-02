@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"math"
+	"time"
 )
 
 func (client *esHTTPClient) getGossip(set *checkSet) (*gossipResponse, error) {
+	defer monitor.track(time.Now(), "server_ip_port")
 	gossipCheck := set.createCheck("server_ip_port")
 
 	body, err := client.get("/gossip")
@@ -29,6 +31,9 @@ func (client *esHTTPClient) getGossip(set *checkSet) (*gossipResponse, error) {
 }
 
 func (cs *checkSet) doMasterCount(r *gossipResponse) {
+	defer monitor.track(time.Now(), "alive_master")
+	check := cs.createCheck("alive_master")
+
 	count := 0
 	for _, m := range r.Members {
 		if m.State == "Master" && m.IsAlive {
@@ -36,7 +41,6 @@ func (cs *checkSet) doMasterCount(r *gossipResponse) {
 		}
 	}
 
-	check := cs.createCheck("alive_master")
 	check.Data = count
 	check.Output = fmt.Sprintf("%d master node(s)", count)
 	if count != 1 {
@@ -45,6 +49,9 @@ func (cs *checkSet) doMasterCount(r *gossipResponse) {
 }
 
 func (cs *checkSet) doSlaveCount(r *gossipResponse) {
+	defer monitor.track(time.Now(), "alive_slaves")
+	check := cs.createCheck("alive_slaves")
+
 	count := 0
 	failLevel := int(math.Ceil(float64(config.ClusterSize)/2)) - 1
 	warnLevel := config.ClusterSize - 1
@@ -54,17 +61,19 @@ func (cs *checkSet) doSlaveCount(r *gossipResponse) {
 		}
 	}
 
-	check := cs.createCheck("alive_slaves")
 	check.Data = count
 	check.Output = fmt.Sprintf("%d slave node(s)", count)
 	if count < failLevel {
-		check.fail(fmt.Sprintf("Expected at least %d slaves. Found %d.", failLevel, count))
+		check.fail(fmt.Sprintf("Expected at least %d slave(s). Found %d.", failLevel, count))
 	} else if count < warnLevel {
-		check.warn(fmt.Sprintf("Expected %d slaves. Found %d.", failLevel, count))
+		check.warn(fmt.Sprintf("Want %d or more slave(s). Found %d.", warnLevel, count))
 	}
 }
 
 func (cs *checkSet) doAliveCount(r *gossipResponse) {
+	defer monitor.track(time.Now(), "alive_nodes")
+	check := cs.createCheck("alive_nodes")
+
 	count := 0
 	failLevel := int(math.Ceil(float64(config.ClusterSize) / 2))
 	warnLevel := config.ClusterSize
@@ -74,12 +83,11 @@ func (cs *checkSet) doAliveCount(r *gossipResponse) {
 		}
 	}
 
-	check := cs.createCheck("alive_nodes")
 	check.Data = count
 	check.Output = fmt.Sprintf("%d alive node(s)", count)
 	if count < failLevel {
-		check.fail(fmt.Sprintf("Expected at least %d alive nodes. Found %d.", failLevel, count))
+		check.fail(fmt.Sprintf("Expected at least %d alive node(s). Found %d.", failLevel, count))
 	} else if count < warnLevel {
-		check.warn(fmt.Sprintf("Expected %d alive nodes. Found %d.", failLevel, count))
+		check.warn(fmt.Sprintf("Want %d or more alive node(s). Found %d.", warnLevel, count))
 	}
 }

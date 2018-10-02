@@ -59,9 +59,10 @@ func main() {
 	})
 
 	log.WithFields(log.Fields{
-		"EmonHTTPBindAddress": config.EmonHTTPBindAddress,
-		"ClusterHTTPEndpoint": config.ClusterHTTPEndpoint,
-		"ClusterSize":         config.ClusterSize,
+		"EmonHTTPBindAddress":    config.EmonHTTPBindAddress,
+		"EmonSlowCheckThreshold": config.EmonSlowCheckThreshold,
+		"ClusterHTTPEndpoint":    config.ClusterHTTPEndpoint,
+		"ClusterSize":            config.ClusterSize,
 	}).Infof("emon started")
 
 	srv := &http.Server{

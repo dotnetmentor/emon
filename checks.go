@@ -14,7 +14,6 @@ type checkSet struct {
 type check struct {
 	Name   string      `json:"-"`
 	Status string      `json:"status,omitempty"`
-	Reason string      `json:"reason,omitempty"`
 	Data   interface{} `json:"data,omitempty"`
 	Output string      `json:"output,omitempty"`
 }
@@ -40,10 +39,10 @@ func (s *checkSet) createCheck(name string) *check {
 
 func (c *check) fail(reason string) {
 	c.Status = statusFailed
-	c.Reason = reason
+	c.Output = reason
 }
 
 func (c *check) warn(reason string) {
 	c.Status = statusWarning
-	c.Reason = reason
+	c.Output = reason
 }

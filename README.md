@@ -6,11 +6,13 @@ Eventstore monitoring over HTTP
 
 ## Configuration
 
-| Environment variable       | Description                     | Default               |
-|----------------------------|---------------------------------|-----------------------|
-| EMON_HTTP_BIND_ADDRESS     | The address emon will listen on | :8113                 |
-| EMON_CLUSTER_HTTP_ENDPOINT | The eventstore HTTP address     | http://localhost:2113 |
-| EMON_CLUSTER_SIZE          | The eventstore cluster size     | 3                     |
+| Environment variable       | Description                          | Default               |
+|----------------------------|--------------------------------------|-----------------------|
+| EMON_HTTP_BIND_ADDRESS     | The address emon will listen on      | :8113                 |
+| EMON_SLOW_CHECK_THRESHOLD  | The threshold for slow_check warning | 20ms                  |
+| EMON_CLUSTER_HTTP_ENDPOINT | The eventstore HTTP address          | http://localhost:2113 |
+| EMON_CLUSTER_SIZE          | The eventstore cluster size          | 3                     |
+
 
 ## Checks
 
@@ -26,7 +28,7 @@ Eventstore monitoring over HTTP
 | gossip | cpu_used          | Expects cpu usage to be less then `n` percent. (`default: 90%`)                                 | -                  |
 | ?      | storage_disk_full | Expects there to be at least `n` percent free disk space for the storage drive (`default: 25%`) | -                  |
 | ?      | os_disk_full      | Expects there to be at least `n` percent free disk space for the os drive (`default: 25%`)      | -                  |
-| timer  | slow_checks       | Expects each check to complete within `n` milliseconds (`default: 100ms`)                       | -                  |
+| timer  | slow_checks       | Expects each check to complete within `n` milliseconds (`default: 100ms`)                       | :white_check_mark: |
 
 
 ## Development
