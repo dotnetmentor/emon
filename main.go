@@ -29,7 +29,7 @@ func main() {
 
 		status := http.StatusOK
 
-		checkSets, code := checkHealth()
+		checkSets, code := runHealthchecks()
 		if code != 0 {
 			status = http.StatusFailedDependency
 		}

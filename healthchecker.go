@@ -6,7 +6,7 @@ import (
 	"github.com/apex/log"
 )
 
-func checkHealth() ([]*checkSet, int) {
+func runHealthchecks() ([]*checkSet, int) {
 	client := newClient(config.ClusterHTTPEndpoint)
 	checks := make([]*checkSet, 0)
 
