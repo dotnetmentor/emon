@@ -4,6 +4,12 @@ Eventstore monitoring over HTTP
 
 **NOTE: NOT ready for production!!!**
 
+[![Docker Automated build](https://img.shields.io/docker/automated/dotnetmentor/emon.svg?style=for-the-badge)](https://hub.docker.com/r/dotnetmentor/emon/)
+[![Docker Build Status](https://img.shields.io/docker/build/dotnetmentor/emon.svg?style=for-the-badge)](https://hub.docker.com/r/dotnetmentor/emon/)
+[![MicroBadger Size](https://img.shields.io/microbadger/image-size/dotnetmentor/emon.svg?style=for-the-badge)](https://hub.docker.com/r/dotnetmentor/emon/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dotnetmentor/emon.svg?style=for-the-badge)](https://hub.docker.com/r/dotnetmentor/emon/)
+
+
 ## Configuration
 
 | Environment variable       | Description                          | Default               |
