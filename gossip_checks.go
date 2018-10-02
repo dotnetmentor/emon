@@ -31,12 +31,12 @@ func (client *esHTTPClient) getGossip(set *checkSet) (*gossipResponse, error) {
 func (cs *checkSet) doMasterCount(r *gossipResponse) {
 	count := 0
 	for _, m := range r.Members {
-		if m.State == "Master" {
+		if m.State == "Master" && m.IsAlive {
 			count++
 		}
 	}
 
-	check := cs.createCheck("exactly_1_master")
+	check := cs.createCheck("alive_master")
 	check.Data = fmt.Sprintf("%d master node(s)", count)
 	if count != 1 {
 		check.fail(fmt.Sprintf("Expected 1 master. Found %d.", count))
@@ -45,23 +45,27 @@ func (cs *checkSet) doMasterCount(r *gossipResponse) {
 
 func (cs *checkSet) doSlaveCount(r *gossipResponse) {
 	count := 0
-	expected := (config.ClusterSize - 1)
+	failLevel := int(math.Ceil(float64(config.ClusterSize)/2)) - 1
+	warnLevel := config.ClusterSize - 1
 	for _, m := range r.Members {
-		if m.State == "Slave" {
+		if m.State == "Slave" && m.IsAlive {
 			count++
 		}
 	}
 
-	check := cs.createCheck("exactly_2_slaves")
+	check := cs.createCheck("alive_slaves")
 	check.Data = fmt.Sprintf("%d slave node(s)", count)
-	if count != expected {
-		check.fail(fmt.Sprintf("Expected %d slaves. Found %d.", expected, count))
+	if count < failLevel {
+		check.fail(fmt.Sprintf("Expected at least %d slaves. Found %d.", failLevel, count))
+	} else if count < warnLevel {
+		check.warn(fmt.Sprintf("Expected %d slaves. Found %d.", failLevel, count))
 	}
 }
 
 func (cs *checkSet) doAliveCount(r *gossipResponse) {
 	count := 0
-	expected := int(math.Ceil(float64(config.ClusterSize) / 2))
+	failLevel := int(math.Ceil(float64(config.ClusterSize) / 2))
+	warnLevel := config.ClusterSize
 	for _, m := range r.Members {
 		if m.IsAlive {
 			count++
@@ -70,9 +74,9 @@ func (cs *checkSet) doAliveCount(r *gossipResponse) {
 
 	check := cs.createCheck("alive_nodes")
 	check.Data = fmt.Sprintf("%d alive node(s)", count)
-	if count < expected {
-		check.fail(fmt.Sprintf("Expected at least %d alive nodes. Found %d.", expected, count))
-	} else if count < config.ClusterSize {
-		check.warn(fmt.Sprintf("Expected %d alive nodes. Found %d.", config.ClusterSize, count))
+	if count < failLevel {
+		check.fail(fmt.Sprintf("Expected at least %d alive nodes. Found %d.", failLevel, count))
+	} else if count < warnLevel {
+		check.warn(fmt.Sprintf("Expected %d alive nodes. Found %d.", failLevel, count))
 	}
 }
