@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/apex/log"
@@ -44,13 +43,13 @@ func runHealthchecks() ([]*checkSet, int) {
 	checkSets = append(checkSets, monitor.getCheckSet())
 
 	// Output checks
-	success := true
+	exitCode := 0
 
 	for _, cs := range checkSets {
 		for _, c := range cs.checks {
 			topic := "gossip"
 			lm := log.WithFields(log.Fields{
-				"check":  strings.Replace(c.Name, "gossip:", "", -1),
+				"check":  c.Name,
 				"status": c.Status,
 				"data":   c.Data,
 				"output": c.Output,
@@ -59,21 +58,19 @@ func runHealthchecks() ([]*checkSet, int) {
 			switch c.Status {
 			case statusSuccess:
 				lm.Info(topic)
+				break
 			case statusWarning:
 				lm.Warn(topic)
+				if exitCode == 0 {
+					exitCode = 1
+				}
+				break
 			case statusFailed:
 				lm.Error(topic)
-			}
-
-			if c.Status != statusSuccess {
-				success = false
+				exitCode = 2
+				break
 			}
 		}
-	}
-
-	exitCode := 0
-	if !success {
-		exitCode = 1
 	}
 
 	return checkSets, exitCode
@@ -102,7 +99,7 @@ func (pm *perfMon) getCheckSet() *checkSet {
 
 	check.Data = slow
 	if len(slow) > 0 {
-		check.warn(fmt.Sprintf("One or more checks are performing badly (over %v).", config.EmonSlowCheckThreshold))
+		check.warn(fmt.Sprintf("One or more checks are performing badly (over %v) %v.", config.EmonSlowCheckThreshold, slow))
 	}
 
 	return cs
