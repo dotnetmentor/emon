@@ -30,15 +30,15 @@ func runHealthchecks() ([]*checkSet, int) {
 		gossip.doMasterCount(gr)
 		gossip.doSlaveCount(gr)
 		gossip.doAliveCount(gr)
-	}
 
-	// Do stats checks
-	sr, err := client.getStats(stats, gr.ServerIP)
-	if err == nil {
-		stats.doSysCPUCheck(sr)
-		stats.doSysMemoryCheck(sr)
-		stats.doProcCPUCheck(sr)
-		stats.doProcMemoryCheck(sr)
+		// Do stats checks
+		sr, err := client.getStats(stats, gr.ServerIP)
+		if err == nil {
+			stats.doSysCPUCheck(sr)
+			stats.doSysMemoryCheck(sr)
+			stats.doProcCPUCheck(sr)
+			stats.doProcMemoryCheck(sr)
+		}
 	}
 
 	checkSets = append(checkSets, monitor.getCheckSet())
