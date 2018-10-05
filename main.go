@@ -28,28 +28,30 @@ func main() {
 			return
 		}
 
-		status := http.StatusOK
+		status := "healthy"
+		statusCode := http.StatusOK
 
 		checkSets, code := runHealthchecks()
-		if code != 0 {
-			status = http.StatusFailedDependency
+		switch code {
+		case 1:
+			status = "warn"
+		case 2:
+			status = "alert"
+			statusCode = http.StatusFailedDependency
 		}
 
 		resp := apiResponse{
-			Ok:     true,
+			Status: status,
 			Checks: make(map[string]*check),
 		}
 		for _, cs := range checkSets {
 			for _, c := range cs.checks {
 				resp.Checks[c.Name] = c
-				if c.Status == statusFailed {
-					resp.Ok = false
-				}
 			}
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
+		w.WriteHeader(statusCode)
 
 		js, err := json.Marshal(resp)
 		if err == nil {
@@ -57,9 +59,9 @@ func main() {
 		}
 
 		log.WithFields(log.Fields{
-			"status":    status,
+			"status":    statusCode,
 			"direction": "outgoing",
-		}).Infof("HTTP %s %s - %s", r.Method, r.RequestURI, http.StatusText(status))
+		}).Infof("HTTP %s %s - %s", r.Method, r.RequestURI, http.StatusText(statusCode))
 	})
 
 	log.WithFields(log.Fields{
@@ -78,6 +80,6 @@ func main() {
 }
 
 type apiResponse struct {
-	Ok     bool              `json:"ok"`
+	Status string            `json:"status"`
 	Checks map[string]*check `json:"checks"`
 }
