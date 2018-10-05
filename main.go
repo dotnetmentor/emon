@@ -48,9 +48,13 @@ func main() {
 			}
 		}
 
-		w.WriteHeader(status)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		w.WriteHeader(status)
+
+		js, err := json.Marshal(resp)
+		if err == nil {
+			w.Write(js)
+		}
 
 		log.WithFields(log.Fields{
 			"status":    status,
