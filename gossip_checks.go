@@ -22,11 +22,6 @@ func (client *esHTTPClient) getGossip(set *checkSet) (*gossipResponse, error) {
 		return nil, err
 	}
 
-	gossipCheck.Data = fmt.Sprintf("%s:%d", r.ServerIP, r.ServerPort)
-	if r.ServerIP == "" || r.ServerPort < 1 {
-		gossipCheck.fail("No server ip/port in gossip")
-	}
-
 	return r, nil
 }
 
