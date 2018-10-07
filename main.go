@@ -42,11 +42,15 @@ func main() {
 
 		resp := apiResponse{
 			Status: status,
-			Checks: make(map[string]*check),
+			Checks: make(map[string]apiChecks),
 		}
+
 		for _, cs := range checkSets {
+			if resp.Checks[cs.source] == nil {
+				resp.Checks[cs.source] = apiChecks{}
+			}
 			for _, c := range cs.checks {
-				resp.Checks[c.Name] = c
+				resp.Checks[cs.source][c.Name] = c
 			}
 		}
 
@@ -80,6 +84,8 @@ func main() {
 }
 
 type apiResponse struct {
-	Status string            `json:"status"`
-	Checks map[string]*check `json:"checks"`
+	Status string               `json:"status"`
+	Checks map[string]apiChecks `json:"checks"`
 }
+
+type apiChecks map[string]*check

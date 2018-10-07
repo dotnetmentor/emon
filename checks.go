@@ -8,6 +8,7 @@ const statusSuccess = "success"
 
 type checkSet struct {
 	name   string
+	source string
 	checks []*check
 }
 
@@ -18,10 +19,11 @@ type check struct {
 	Output string      `json:"output,omitempty"`
 }
 
-func createCheckSet(name string) *checkSet {
+func createCheckSet(name string, source string) *checkSet {
 	s := make([]*check, 0)
 	return &checkSet{
 		name:   name,
+		source: source,
 		checks: s,
 	}
 }

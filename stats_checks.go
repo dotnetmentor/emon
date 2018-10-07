@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-func (client *esHTTPClient) getStats(set *checkSet, nodeIP string) (*statsResponse, error) {
+func (client *esHTTPClient) getStats(set *checkSet) (*statsResponse, error) {
 	defer monitor.track(time.Now(), "collect_stats")
 	check := set.createCheck("collect_stats")
 
-	body, err := client.get(fmt.Sprintf("%s://%s:%d/stats", client.Scheme, nodeIP, client.Port))
+	body, err := client.get("/stats")
 	if err != nil {
 		check.fail(fmt.Sprintf("An error occured fetching gossip. %s", err))
 		return nil, err

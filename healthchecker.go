@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"net"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/apex/log"
@@ -10,33 +13,40 @@ import (
 var monitor perfMon
 
 func runHealthchecks() ([]*checkSet, int) {
-	client := newClient(config.ClusterHTTPEndpoint)
+	nodes := getNodes(config.ClusterHTTPEndpoint)
+	log.Infof("Running healthchecks on %s (nodes: %v)", config.ClusterHTTPEndpoint, nodes)
+
 	checkSets := make([]*checkSet, 0)
 	monitor = perfMon{
 		name:    "checks",
 		results: make(map[string]time.Duration),
 	}
 
-	gossip := createCheckSet("gossip")
-	checkSets = append(checkSets, gossip)
+	for _, node := range nodes {
+		nodeURL, _ := url.Parse(node)
+		nodeName := fmt.Sprintf("node-%s", strings.Replace(nodeURL.Hostname(), ".", "-", -1))
+		gossip := createCheckSet("gossip", nodeName)
+		checkSets = append(checkSets, gossip)
 
-	stats := createCheckSet("stats")
-	checkSets = append(checkSets, stats)
+		stats := createCheckSet("stats", nodeName)
+		checkSets = append(checkSets, stats)
 
-	// Do gossip checks
-	gr, err := client.getGossip(gossip)
-	if err == nil {
-		gossip.doMasterCount(gr)
-		gossip.doSlaveCount(gr)
-		gossip.doAliveCount(gr)
-
-		// Do stats checks
-		sr, err := client.getStats(stats, gr.ServerIP)
+		// Do gossip checks
+		client := newClient(node)
+		gr, err := client.getGossip(gossip)
 		if err == nil {
-			stats.doSysCPUCheck(sr)
-			stats.doSysMemoryCheck(sr)
-			stats.doProcCPUCheck(sr)
-			stats.doProcMemoryCheck(sr)
+			gossip.doMasterCount(gr)
+			gossip.doSlaveCount(gr)
+			gossip.doAliveCount(gr)
+
+			// Do stats checks
+			sr, err := client.getStats(stats)
+			if err == nil {
+				stats.doSysCPUCheck(sr)
+				stats.doSysMemoryCheck(sr)
+				stats.doProcCPUCheck(sr)
+				stats.doProcMemoryCheck(sr)
+			}
 		}
 	}
 
@@ -50,6 +60,7 @@ func runHealthchecks() ([]*checkSet, int) {
 			topic := "gossip"
 			lm := log.WithFields(log.Fields{
 				"check":  c.Name,
+				"source": cs.source,
 				"status": c.Status,
 				"data":   c.Data,
 				"output": c.Output,
@@ -76,6 +87,29 @@ func runHealthchecks() ([]*checkSet, int) {
 	return checkSets, exitCode
 }
 
+func getNodes(endpoint string) []string {
+	nodes := make([]string, 0)
+
+	url, err := url.Parse(endpoint)
+	if err != nil {
+		log.Errorf("Failed parsing url %v. Error: %v", endpoint, err)
+	} else {
+		results, err := net.LookupHost(url.Hostname())
+		if err != nil {
+			log.Errorf("Failed looking up endpoint %v. Error: %v", endpoint, err)
+		} else {
+			for _, r := range results {
+				if r != "::1" {
+					node := fmt.Sprintf("%s://%s:%s", url.Scheme, r, url.Port())
+					nodes = append(nodes, node)
+				}
+			}
+		}
+	}
+
+	return nodes
+}
+
 type perfMon struct {
 	name    string
 	results map[string]time.Duration
@@ -87,7 +121,7 @@ func (pm *perfMon) track(start time.Time, name string) {
 }
 
 func (pm *perfMon) getCheckSet() *checkSet {
-	cs := createCheckSet(pm.name)
+	cs := createCheckSet(pm.name, "emon")
 	check := cs.createCheck("slow_checks")
 	slow := make(map[string]int)
 
