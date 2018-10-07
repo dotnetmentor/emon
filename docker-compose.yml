@@ -6,6 +6,10 @@ services:
     ports:
     - 12113:2113/tcp
     - 11113:1113/tcp
+    networks:
+      cluster:
+        aliases:
+         - cluster.eventstore.docker
     environment:
       EVENTSTORE_CLUSTER_DNS: eventstore1
       EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
@@ -27,6 +31,10 @@ services:
     ports:
     - 22113:2113/tcp
     - 21113:1113/tcp
+    networks:
+      cluster:
+        aliases:
+         - cluster.eventstore.docker
     environment:
       EVENTSTORE_CLUSTER_DNS: eventstore1
       EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
@@ -48,6 +56,10 @@ services:
     ports:
     - 32113:2113/tcp
     - 31113:1113/tcp
+    networks:
+      cluster:
+        aliases:
+         - cluster.eventstore.docker
     environment:
       EVENTSTORE_CLUSTER_DNS: eventstore1
       EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
@@ -69,5 +81,10 @@ services:
     build: .
     ports:
       - "8113:8113"
+    networks:
+      cluster:
     environment:
-      EMON_CLUSTER_HTTP_ENDPOINT: http://eventstore1:2113
+      EMON_CLUSTER_HTTP_ENDPOINT: http://cluster.eventstore.docker:2113
+
+networks:
+  cluster:
