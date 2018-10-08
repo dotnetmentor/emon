@@ -13,8 +13,10 @@ import (
 var monitor perfMon
 
 func runHealthchecks() ([]*checkSet, int) {
+	start := time.Now()
+
 	nodes := getNodes(config.ClusterHTTPEndpoint)
-	log.Infof("Running healthchecks on %s (nodes: %v)", config.ClusterHTTPEndpoint, nodes)
+	log.Infof("Running healthchecks on %s", config.ClusterHTTPEndpoint)
 
 	checkSets := make([]*checkSet, 0)
 	monitor = perfMon{
@@ -60,6 +62,8 @@ func runHealthchecks() ([]*checkSet, int) {
 	cluster.doClusterConsensusChecks(nodeGossip)
 
 	checkSets = append(checkSets, monitor.getCheckSet())
+
+	log.Infof("Completed all checks in %dms", int(time.Since(start)/time.Millisecond))
 
 	// Output checks
 	exitCode := 0
