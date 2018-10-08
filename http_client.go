@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -20,40 +19,6 @@ type esHTTPClient struct {
 	Scheme      string
 	ContentType string
 	HTTPClient  *http.Client
-}
-
-type gossipResponse struct {
-	ServerIP   string         `json:"serverIp"`
-	ServerPort int            `json:"serverPort"`
-	Members    []gossipMember `json:"members"`
-}
-
-type gossipMember struct {
-	InstanceID string `json:"instanceId"`
-	State      string `json:"state"`
-	IsAlive    bool   `json:"isAlive"`
-}
-
-type statsResponse struct {
-	Proc statsProc `json:"proc"`
-	Sys  statsSys  `json:"sys"`
-}
-
-type statsProc struct {
-	CPU    float64 `json:"cpu"`
-	Memory float64 `json:"mem"`
-}
-
-type statsSys struct {
-	CPU        float64 `json:"cpu"`
-	FreeMemory float64 `json:"freeMem"`
-}
-
-type errorResponse struct {
-}
-
-func (m gossipMember) IsAliveMaster() bool {
-	return m.IsAlive && m.State == "Master"
 }
 
 func newClient(baseURL string) *esHTTPClient {
@@ -109,16 +74,4 @@ func (c *esHTTPClient) post(path string, body io.Reader) ([]byte, error) {
 
 func (c *esHTTPClient) delete(path string) ([]byte, error) {
 	return c.request("DELETE", path, nil)
-}
-
-func toGossipResponse(body []byte) (*gossipResponse, error) {
-	var s = new(gossipResponse)
-	err := json.Unmarshal(body, &s)
-	return s, err
-}
-
-func toStatsResponse(body []byte) (*statsResponse, error) {
-	var s = new(statsResponse)
-	err := json.Unmarshal(body, &s)
-	return s, err
 }
