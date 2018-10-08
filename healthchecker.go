@@ -18,48 +18,39 @@ func runHealthchecks() ([]*checkSet, int) {
 	nodes := getNodes(config.ClusterHTTPEndpoint)
 	log.Infof("Running healthchecks on %s", config.ClusterHTTPEndpoint)
 
-	checkSets := make([]*checkSet, 0)
 	monitor = perfMon{
 		name:    "checks",
 		results: make(map[string]time.Duration),
 	}
 
-	nodeGossip := make([]*gossipResponse, 0)
+	resultChan := make(chan *nodeResult, len(nodes))
+	results := make([]*nodeResult, 0)
+	checkSets := make([]*checkSet, 0)
 
 	for _, node := range nodes {
-		nodeURL, _ := url.Parse(node)
-		nodeName := fmt.Sprintf("node-%s", strings.Replace(nodeURL.Hostname(), ".", "-", -1))
-		gossip := createCheckSet("gossip", nodeName)
-		checkSets = append(checkSets, gossip)
+		n := node
+		go runNodeHealthchecks(n, resultChan)
+	}
 
-		stats := createCheckSet("stats", nodeName)
-		checkSets = append(checkSets, stats)
+	c := 0
+	for nr := range resultChan {
+		c++
 
-		// Do gossip checks
-		client := newClient(node)
-		gr, err := client.getGossip(gossip)
-		if err == nil {
-			nodeGossip = append(nodeGossip, gr)
+		log.Infof("Received result from %s. (%d of %d in %dms)", nr.host, c, len(nodes), int(time.Since(start)/time.Millisecond))
+		results = append(results, nr)
 
-			gossip.doMasterCount(gr)
-			gossip.doSlaveCount(gr)
-			gossip.doAliveCount(gr)
+		for _, cs := range nr.checkSets {
+			checkSets = append(checkSets, cs)
+		}
 
-			// Do stats checks
-			sr, err := client.getStats(stats)
-			if err == nil {
-				stats.doSysCPUCheck(sr)
-				stats.doSysMemoryCheck(sr)
-				stats.doProcCPUCheck(sr)
-				stats.doProcMemoryCheck(sr)
-			}
+		if c == len(nodes) {
+			close(resultChan)
 		}
 	}
 
 	cluster := createCheckSet("gossip", "cluster")
 	checkSets = append(checkSets, cluster)
-
-	cluster.doClusterConsensusChecks(nodeGossip)
+	cluster.doClusterConsensusChecks(results)
 
 	checkSets = append(checkSets, monitor.getCheckSet())
 
@@ -98,6 +89,41 @@ func runHealthchecks() ([]*checkSet, int) {
 	}
 
 	return checkSets, exitCode
+}
+
+func runNodeHealthchecks(node string, resultChan chan *nodeResult) {
+	nodeURL, _ := url.Parse(node)
+	nodeName := fmt.Sprintf("node-%s", strings.Replace(nodeURL.Hostname(), ".", "-", -1))
+
+	result := &nodeResult{
+		host:      nodeURL.Hostname(),
+		checkSets: make([]*checkSet, 0),
+	}
+
+	gossip := result.createCheckSet("gossip", nodeName)
+	stats := result.createCheckSet("stats", nodeName)
+
+	// Do gossip checks
+	client := newClient(node)
+	gr, err := client.getGossip(gossip)
+	if err == nil {
+		result.gossip = gr
+
+		gossip.doMasterCount(gr)
+		gossip.doSlaveCount(gr)
+		gossip.doAliveCount(gr)
+
+		// Do stats checks
+		sr, err := client.getStats(stats)
+		if err == nil {
+			stats.doSysCPUCheck(sr)
+			stats.doSysMemoryCheck(sr)
+			stats.doProcCPUCheck(sr)
+			stats.doProcMemoryCheck(sr)
+		}
+	}
+
+	resultChan <- result
 }
 
 func getNodes(endpoint string) []string {

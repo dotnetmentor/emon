@@ -8,6 +8,12 @@ const statusFailed = "failed"
 const statusWarning = "warning"
 const statusSuccess = "success"
 
+type nodeResult struct {
+	host      string
+	gossip    *gossipResponse
+	checkSets []*checkSet
+}
+
 type checkSet struct {
 	name   string
 	source string
@@ -20,6 +26,12 @@ type check struct {
 	Status string      `json:"status,omitempty"`
 	Data   interface{} `json:"data,omitempty"`
 	Output string      `json:"output,omitempty"`
+}
+
+func (nr *nodeResult) createCheckSet(name string, source string) *checkSet {
+	cs := createCheckSet(name, source)
+	nr.checkSets = append(nr.checkSets, cs)
+	return cs
 }
 
 func createCheckSet(name string, source string) *checkSet {
