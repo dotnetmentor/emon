@@ -12,6 +12,7 @@ type gossipMember struct {
 	InstanceID string `json:"instanceId"`
 	State      string `json:"state"`
 	IsAlive    bool   `json:"isAlive"`
+	Timestamp  string `json:"timestamp"`
 }
 
 type statsResponse struct {
