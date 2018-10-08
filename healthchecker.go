@@ -22,6 +22,8 @@ func runHealthchecks() ([]*checkSet, int) {
 		results: make(map[string]time.Duration),
 	}
 
+	nodeGossip := make([]*gossipResponse, 0)
+
 	for _, node := range nodes {
 		nodeURL, _ := url.Parse(node)
 		nodeName := fmt.Sprintf("node-%s", strings.Replace(nodeURL.Hostname(), ".", "-", -1))
@@ -35,6 +37,8 @@ func runHealthchecks() ([]*checkSet, int) {
 		client := newClient(node)
 		gr, err := client.getGossip(gossip)
 		if err == nil {
+			nodeGossip = append(nodeGossip, gr)
+
 			gossip.doMasterCount(gr)
 			gossip.doSlaveCount(gr)
 			gossip.doAliveCount(gr)
@@ -49,6 +53,11 @@ func runHealthchecks() ([]*checkSet, int) {
 			}
 		}
 	}
+
+	cluster := createCheckSet("gossip", "cluster")
+	checkSets = append(checkSets, cluster)
+
+	cluster.doClusterConsensusChecks(nodeGossip)
 
 	checkSets = append(checkSets, monitor.getCheckSet())
 
@@ -133,7 +142,7 @@ func (pm *perfMon) getCheckSet() *checkSet {
 
 	check.Data = slow
 	if len(slow) > 0 {
-		check.warn(fmt.Sprintf("One or more checks are performing badly (over %v) %v.", config.EmonSlowCheckThreshold, slow))
+		check.warn(fmt.Sprintf("One or more checks are performing badly (over %v)", config.EmonSlowCheckThreshold))
 	}
 
 	return cs

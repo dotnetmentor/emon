@@ -31,7 +31,7 @@ func (cs *checkSet) doMasterCount(r *gossipResponse) {
 
 	count := 0
 	for _, m := range r.Members {
-		if m.State == "Master" && m.IsAlive {
+		if m.IsAliveMaster() {
 			count++
 		}
 	}

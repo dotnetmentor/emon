@@ -52,6 +52,10 @@ type statsSys struct {
 type errorResponse struct {
 }
 
+func (m gossipMember) IsAliveMaster() bool {
+	return m.IsAlive && m.State == "Master"
+}
+
 func newClient(baseURL string) *esHTTPClient {
 	u, _ := url.Parse(baseURL)
 	port, err := strconv.Atoi(u.Port())
