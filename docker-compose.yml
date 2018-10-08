@@ -11,7 +11,7 @@ services:
         aliases:
          - cluster.eventstore.docker
     environment:
-      EVENTSTORE_CLUSTER_DNS: eventstore1
+      EVENTSTORE_CLUSTER_DNS: cluster.eventstore.docker
       EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
       EVENTSTORE_CLUSTER_SIZE: '3'
       EVENTSTORE_EXT_HTTP_PORT_ADVERTISE_AS: '12113'
@@ -36,7 +36,7 @@ services:
         aliases:
          - cluster.eventstore.docker
     environment:
-      EVENTSTORE_CLUSTER_DNS: eventstore1
+      EVENTSTORE_CLUSTER_DNS: cluster.eventstore.docker
       EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
       EVENTSTORE_CLUSTER_SIZE: '3'
       EVENTSTORE_EXT_HTTP_PORT_ADVERTISE_AS: '22113'
@@ -61,7 +61,7 @@ services:
         aliases:
          - cluster.eventstore.docker
     environment:
-      EVENTSTORE_CLUSTER_DNS: eventstore1
+      EVENTSTORE_CLUSTER_DNS: cluster.eventstore.docker
       EVENTSTORE_CLUSTER_GOSSIP_PORT: '2112'
       EVENTSTORE_CLUSTER_SIZE: '3'
       EVENTSTORE_EXT_HTTP_PORT_ADVERTISE_AS: '32113'
