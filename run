@@ -5,4 +5,4 @@ export EMON_CLUSTER_HTTP_ENDPOINT='http://localhost:12113'
 export EMON_CLUSTER_SIZE=3
 #export EMON_SLOW_CHECK_THRESHOLD='10ms'
 
-go run main.go http_client.go checks.go gossip_checks.go stats_checks.go cluster_checks.go healthchecker.go config.go
+go build && ./emon
