@@ -14,7 +14,7 @@ func (cs *checkSet) doClusterConsensusChecks(nodeResults []*nodeResult) {
 
 func (cs *checkSet) doClusterConsensusMasterCheck(nodeResults []*nodeResult) {
 	check := cs.createCheck("master_consensus")
-	defer monitor.trackCheck(time.Now(), check)
+	defer cs.monitorCheck(time.Now(), check)
 
 	masters := make([]string, 0)
 
@@ -34,7 +34,7 @@ func (cs *checkSet) doClusterConsensusMasterCheck(nodeResults []*nodeResult) {
 
 func (cs *checkSet) doClusterConsensusTimeCheck(nodeResults []*nodeResult) {
 	check := cs.createCheck("time_consensus")
-	defer monitor.trackCheck(time.Now(), check)
+	defer cs.monitorCheck(time.Now(), check)
 
 	masterTimestamp := time.Now()
 	timestamps := make([]time.Time, 0)

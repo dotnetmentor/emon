@@ -15,19 +15,17 @@ func (pm *perfMon) track(start time.Time, name string) {
 	pm.results[name] = elapsed
 }
 
-func (pm *perfMon) trackCheck(start time.Time, check *check) {
-	key := fmt.Sprintf("%s:%s", check.Source, check.Name)
-	pm.track(start, key)
-}
-
-func (pm *perfMon) getCheckSet() *checkSet {
-	cs := createCheckSet(pm.name, "emon")
+func createMonitoringResultCheckSet(monitors []*perfMon) *checkSet {
+	cs := createCheckSet("checks", "emon")
 	check := cs.createCheck("slow_checks")
 	slow := make(map[string]int)
 
-	for k, ns := range pm.results {
-		if ns > config.EmonSlowCheckThreshold {
-			slow[k] = int(ns / time.Millisecond)
+	for _, pm := range monitors {
+		for k, ns := range pm.results {
+			key := fmt.Sprintf("%s:%s", pm.name, k)
+			if ns > config.EmonSlowCheckThreshold {
+				slow[key] = int(ns / time.Millisecond)
+			}
 		}
 	}
 

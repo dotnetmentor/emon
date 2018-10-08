@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 const statusFailed = "failed"
@@ -15,14 +16,14 @@ type nodeResult struct {
 }
 
 type checkSet struct {
-	name   string
-	source string
-	checks []*check
+	name    string
+	source  string
+	checks  []*check
+	monitor *perfMon
 }
 
 type check struct {
 	Name   string      `json:"-"`
-	Source string      `json:"-"`
 	Status string      `json:"status,omitempty"`
 	Data   interface{} `json:"data,omitempty"`
 	Output string      `json:"output,omitempty"`
@@ -36,23 +37,31 @@ func (nr *nodeResult) createCheckSet(name string, source string) *checkSet {
 
 func createCheckSet(name string, source string) *checkSet {
 	s := make([]*check, 0)
+	m := &perfMon{
+		name:    source,
+		results: make(map[string]time.Duration),
+	}
 	return &checkSet{
-		name:   name,
-		source: source,
-		checks: s,
+		name:    name,
+		source:  source,
+		checks:  s,
+		monitor: m,
 	}
 }
 
 func (s *checkSet) createCheck(name string) *check {
 	c := &check{
 		Name:   fmt.Sprintf("%s:%s", s.name, name),
-		Source: s.source,
 		Status: statusSuccess,
 	}
 
 	s.checks = append(s.checks, c)
 
 	return c
+}
+
+func (s *checkSet) monitorCheck(start time.Time, check *check) {
+	s.monitor.track(start, check.Name)
 }
 
 func (c *check) fail(reason string) {

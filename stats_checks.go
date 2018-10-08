@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-func (client *esHTTPClient) getStats(set *checkSet) (*statsResponse, error) {
-	check := set.createCheck("collect_stats")
-	defer monitor.trackCheck(time.Now(), check)
+func (client *esHTTPClient) getStats(cs *checkSet) (*statsResponse, error) {
+	check := cs.createCheck("collect_stats")
+	defer cs.monitorCheck(time.Now(), check)
 
 	body, err := client.get("/stats")
 	if err != nil {
@@ -27,7 +27,7 @@ func (client *esHTTPClient) getStats(set *checkSet) (*statsResponse, error) {
 
 func (cs *checkSet) doSysCPUCheck(r *statsResponse) {
 	check := cs.createCheck("sys_cpu")
-	defer monitor.trackCheck(time.Now(), check)
+	defer cs.monitorCheck(time.Now(), check)
 	expected := 90.0 // TODO: Make configurable
 
 	cpu := math.Round(r.Sys.CPU*100) / 100
@@ -41,7 +41,7 @@ func (cs *checkSet) doSysCPUCheck(r *statsResponse) {
 
 func (cs *checkSet) doSysMemoryCheck(r *statsResponse) {
 	check := cs.createCheck("sys_mem")
-	defer monitor.trackCheck(time.Now(), check)
+	defer cs.monitorCheck(time.Now(), check)
 	expected := 200 // TODO: Make configurable
 
 	freeMB := int((r.Sys.FreeMemory / 1000) / 1000)
@@ -55,7 +55,7 @@ func (cs *checkSet) doSysMemoryCheck(r *statsResponse) {
 
 func (cs *checkSet) doProcCPUCheck(r *statsResponse) {
 	check := cs.createCheck("proc_cpu")
-	defer monitor.trackCheck(time.Now(), check)
+	defer cs.monitorCheck(time.Now(), check)
 	expected := 90.0 // TODO: Make configurable
 
 	cpu := math.Round(r.Proc.CPU*100) / 100
@@ -69,7 +69,7 @@ func (cs *checkSet) doProcCPUCheck(r *statsResponse) {
 
 func (cs *checkSet) doProcMemoryCheck(r *statsResponse) {
 	check := cs.createCheck("proc_mem")
-	defer monitor.trackCheck(time.Now(), check)
+	defer cs.monitorCheck(time.Now(), check)
 	expected := 1000 // TODO: Make configurable
 
 	usedMB := int((r.Proc.Memory / 1000) / 1000)

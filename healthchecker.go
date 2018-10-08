@@ -10,22 +10,16 @@ import (
 	"github.com/apex/log"
 )
 
-var monitor perfMon
-
 func runHealthchecks() ([]*checkSet, int) {
 	start := time.Now()
 
 	nodes := getNodes(config.ClusterHTTPEndpoint)
 	log.Infof("Running healthchecks on %s", config.ClusterHTTPEndpoint)
 
-	monitor = perfMon{
-		name:    "checks",
-		results: make(map[string]time.Duration),
-	}
-
 	resultChan := make(chan *nodeResult, len(nodes))
 	results := make([]*nodeResult, 0)
 	checkSets := make([]*checkSet, 0)
+	monitors := make([]*perfMon, 0)
 
 	for _, node := range nodes {
 		n := node
@@ -41,6 +35,7 @@ func runHealthchecks() ([]*checkSet, int) {
 
 		for _, cs := range nr.checkSets {
 			checkSets = append(checkSets, cs)
+			monitors = append(monitors, cs.monitor)
 		}
 
 		if c == len(nodes) {
@@ -52,7 +47,7 @@ func runHealthchecks() ([]*checkSet, int) {
 	checkSets = append(checkSets, cluster)
 	cluster.doClusterConsensusChecks(results)
 
-	checkSets = append(checkSets, monitor.getCheckSet())
+	checkSets = append(checkSets, createMonitoringResultCheckSet(monitors))
 
 	log.Infof("Completed all checks in %dms", int(time.Since(start)/time.Millisecond))
 
