@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const statusFailed = "failed"
 const statusWarning = "warning"
@@ -14,6 +16,7 @@ type checkSet struct {
 
 type check struct {
 	Name   string      `json:"-"`
+	Source string      `json:"-"`
 	Status string      `json:"status,omitempty"`
 	Data   interface{} `json:"data,omitempty"`
 	Output string      `json:"output,omitempty"`
@@ -31,6 +34,7 @@ func createCheckSet(name string, source string) *checkSet {
 func (s *checkSet) createCheck(name string) *check {
 	c := &check{
 		Name:   fmt.Sprintf("%s:%s", s.name, name),
+		Source: s.source,
 		Status: statusSuccess,
 	}
 

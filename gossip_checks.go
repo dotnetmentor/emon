@@ -7,18 +7,18 @@ import (
 )
 
 func (client *esHTTPClient) getGossip(set *checkSet) (*gossipResponse, error) {
-	defer monitor.track(time.Now(), "collect_gossip")
-	gossipCheck := set.createCheck("collect_gossip")
+	check := set.createCheck("collect_gossip")
+	defer monitor.trackCheck(time.Now(), check)
 
 	body, err := client.get("/gossip")
 	if err != nil {
-		gossipCheck.fail(fmt.Sprintf("An error occured fetching gossip. %s", err))
+		check.fail(fmt.Sprintf("An error occured fetching gossip. %s", err))
 		return nil, err
 	}
 
 	r, err := toGossipResponse(body)
 	if err != nil {
-		gossipCheck.fail(fmt.Sprintf("An error occured parsing gossip. %s", err))
+		check.fail(fmt.Sprintf("An error occured parsing gossip. %s", err))
 		return nil, err
 	}
 
@@ -26,8 +26,8 @@ func (client *esHTTPClient) getGossip(set *checkSet) (*gossipResponse, error) {
 }
 
 func (cs *checkSet) doMasterCount(r *gossipResponse) {
-	defer monitor.track(time.Now(), "alive_master")
 	check := cs.createCheck("alive_master")
+	defer monitor.trackCheck(time.Now(), check)
 
 	count := 0
 	for _, m := range r.Members {
@@ -44,8 +44,8 @@ func (cs *checkSet) doMasterCount(r *gossipResponse) {
 }
 
 func (cs *checkSet) doSlaveCount(r *gossipResponse) {
-	defer monitor.track(time.Now(), "alive_slaves")
 	check := cs.createCheck("alive_slaves")
+	defer monitor.trackCheck(time.Now(), check)
 
 	count := 0
 	failLevel := int(math.Ceil(float64(config.ClusterSize)/2)) - 1
@@ -66,8 +66,8 @@ func (cs *checkSet) doSlaveCount(r *gossipResponse) {
 }
 
 func (cs *checkSet) doAliveCount(r *gossipResponse) {
-	defer monitor.track(time.Now(), "alive_nodes")
 	check := cs.createCheck("alive_nodes")
+	defer monitor.trackCheck(time.Now(), check)
 
 	count := 0
 	failLevel := int(math.Ceil(float64(config.ClusterSize) / 2))

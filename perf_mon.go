@@ -15,6 +15,11 @@ func (pm *perfMon) track(start time.Time, name string) {
 	pm.results[name] = elapsed
 }
 
+func (pm *perfMon) trackCheck(start time.Time, check *check) {
+	key := fmt.Sprintf("%s:%s", check.Source, check.Name)
+	pm.track(start, key)
+}
+
 func (pm *perfMon) getCheckSet() *checkSet {
 	cs := createCheckSet(pm.name, "emon")
 	check := cs.createCheck("slow_checks")
