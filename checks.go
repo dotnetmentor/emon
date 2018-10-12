@@ -12,6 +12,7 @@ const statusSuccess = "success"
 type nodeResult struct {
 	host      string
 	gossip    *gossipResponse
+	stats     *statsResponse
 	checkSets []*checkSet
 }
 

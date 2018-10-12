@@ -107,15 +107,17 @@ func runNodeHealthchecks(node string, resultChan chan *nodeResult) {
 		gossip.doMasterCount(gr)
 		gossip.doSlaveCount(gr)
 		gossip.doAliveCount(gr)
+	}
 
-		// Do stats checks
-		sr, err := client.getStats(stats)
-		if err == nil {
-			stats.doSysCPUCheck(sr)
-			stats.doSysMemoryCheck(sr)
-			stats.doProcCPUCheck(sr)
-			stats.doProcMemoryCheck(sr)
-		}
+	// Do stats checks
+	sr, err := client.getStats(stats)
+	if err == nil {
+		result.stats = sr
+
+		stats.doSysCPUCheck(sr)
+		stats.doSysMemoryCheck(sr)
+		stats.doProcCPUCheck(sr)
+		stats.doProcMemoryCheck(sr)
 	}
 
 	resultChan <- result
