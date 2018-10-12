@@ -66,7 +66,8 @@ func (cs *checkSet) doClusterConsensusTimeCheck(nodeResults []*nodeResult) {
 		}
 	}
 
-	check.Data = timestamps
+	mostAhead := 0.0
+	mostBehind := 0.0
 	for _, t := range timestamps {
 		diff := t.Sub(masterTimestamp)
 		seconds := diff.Seconds()
@@ -83,6 +84,17 @@ func (cs *checkSet) doClusterConsensusTimeCheck(nodeResults []*nodeResult) {
 			check.warn(fmt.Sprintf("Clock is drifting between master and one of the nodes (master: %v. diff: %vs.)", masterTimestamp, seconds))
 			break
 		}
+
+		if seconds < 0.0 && seconds < mostBehind {
+			mostBehind = seconds
+		}
+		if seconds > 0.0 && seconds > mostAhead {
+			mostAhead = seconds
+		}
+	}
+	check.Data = map[string]float64{
+		"maxAhead":  mostAhead,
+		"maxBehind": mostBehind,
 	}
 }
 
