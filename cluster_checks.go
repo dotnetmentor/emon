@@ -16,21 +16,28 @@ func (cs *checkSet) doClusterConsensusMasterCheck(nodeResults []*nodeResult) {
 	check := cs.createCheck("master_consensus")
 	defer cs.monitorCheck(time.Now(), check)
 
-	masters := make([]string, 0)
+	masters := make([]master, 0)
+	mastersIDs := make([]string, 0)
 
 	for _, nr := range nodeResults {
 		if nr.gossip != nil {
 			for _, n := range nr.gossip.Members {
 				if n.IsAliveMaster() {
-					masters = append(masters, n.InstanceID)
+					mastersIDs = append(mastersIDs, n.InstanceID)
+					masters = append(masters, master{
+						InstanceID:     n.InstanceID,
+						InternalHTTPIP: n.InternalHTTPIP,
+						ExternalHTTPIP: n.ExternalHTTPIP,
+					})
 				}
 			}
 		}
 	}
 
-	check.Data = distinct(masters)
-	if !all(masters, equal) || len(masters) != len(nodeResults) {
-		check.fail("Nodes have different masters!")
+	if !all(mastersIDs, equal) || len(mastersIDs) != len(nodeResults) {
+		check.fail(fmt.Sprintf("Nodes have different masters! (masters: %v)", masters))
+	} else {
+		check.Data = masters[0]
 	}
 }
 
