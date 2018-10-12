@@ -19,9 +19,11 @@ func (cs *checkSet) doClusterConsensusMasterCheck(nodeResults []*nodeResult) {
 	masters := make([]string, 0)
 
 	for _, nr := range nodeResults {
-		for _, n := range nr.gossip.Members {
-			if n.IsAliveMaster() {
-				masters = append(masters, n.InstanceID)
+		if nr.gossip != nil {
+			for _, n := range nr.gossip.Members {
+				if n.IsAliveMaster() {
+					masters = append(masters, n.InstanceID)
+				}
 			}
 		}
 	}
@@ -40,16 +42,18 @@ func (cs *checkSet) doClusterConsensusTimeCheck(nodeResults []*nodeResult) {
 	timestamps := make([]time.Time, 0)
 
 	for _, nr := range nodeResults {
-		for _, n := range nr.gossip.Members {
-			if n.IsAlive {
-				t, err := time.Parse(time.RFC3339, n.Timestamp)
-				if err != nil {
-					log.Errorf("Failed parsing timestamp from node gossip. Timestamp: %s. Error: %v", n.Timestamp, err)
-				}
-				timestamps = append(timestamps, t)
+		if nr.gossip != nil {
+			for _, n := range nr.gossip.Members {
+				if n.IsAlive {
+					t, err := time.Parse(time.RFC3339, n.Timestamp)
+					if err != nil {
+						log.Errorf("Failed parsing timestamp from node gossip. Timestamp: %s. Error: %v", n.Timestamp, err)
+					}
+					timestamps = append(timestamps, t)
 
-				if n.IsAliveMaster() {
-					masterTimestamp = t
+					if n.IsAliveMaster() {
+						masterTimestamp = t
+					}
 				}
 			}
 		}
