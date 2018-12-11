@@ -14,7 +14,7 @@ func runHealthchecks() ([]*checkSet, int) {
 	start := time.Now()
 
 	nodes := getNodes(config.ClusterHTTPEndpoint)
-	log.Infof("Running healthchecks on %s", config.ClusterHTTPEndpoint)
+	log.Infof("Running healthchecks on %s", cleanURL(config.ClusterHTTPEndpoint))
 
 	resultChan := make(chan *nodeResult, len(nodes))
 	results := make([]*nodeResult, 0)
@@ -136,7 +136,11 @@ func getNodes(endpoint string) []string {
 		} else {
 			for _, r := range results {
 				if r != "::1" {
-					node := fmt.Sprintf("%s://%s:%s", url.Scheme, r, url.Port())
+					credentials := ""
+					if url.User != nil {
+						credentials = fmt.Sprintf("%s@", url.User.String())
+					}
+					node := fmt.Sprintf("%s://%s%s:%s", url.Scheme, credentials, r, url.Port())
 					nodes = append(nodes, node)
 				}
 			}

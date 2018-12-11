@@ -84,7 +84,7 @@ services:
     networks:
       cluster:
     environment:
-      EMON_CLUSTER_HTTP_ENDPOINT: http://cluster.eventstore.docker:2113
+      EMON_CLUSTER_HTTP_ENDPOINT: http://admin:changeit@cluster.eventstore.docker:2113
 
 networks:
   cluster:

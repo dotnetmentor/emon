@@ -71,7 +71,7 @@ func main() {
 	log.WithFields(log.Fields{
 		"EmonHTTPBindAddress":    config.EmonHTTPBindAddress,
 		"EmonSlowCheckThreshold": config.EmonSlowCheckThreshold,
-		"ClusterHTTPEndpoint":    config.ClusterHTTPEndpoint,
+		"ClusterHTTPEndpoint":    cleanURL(config.ClusterHTTPEndpoint),
 		"ClusterSize":            config.ClusterSize,
 	}).Infof("emon started")
 

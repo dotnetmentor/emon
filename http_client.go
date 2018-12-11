@@ -47,7 +47,7 @@ func (c *esHTTPClient) request(method string, path string, reader io.Reader) ([]
 	req, _ := http.NewRequest(method, url, reader)
 	req.Header.Set("Content-Type", c.ContentType)
 
-	log.Debugf("[DEBUG] HTTP %s %s", method, url)
+	log.Debugf("HTTP %s %s", method, cleanURL(url))
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -58,7 +58,7 @@ func (c *esHTTPClient) request(method string, path string, reader io.Reader) ([]
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("%s %s - %s", method, url, resp.Status)
+		return nil, fmt.Errorf("%s %s - %s", method, cleanURL(url), resp.Status)
 	}
 
 	return body, err
