@@ -34,7 +34,7 @@ func newClient(baseURL string) *esHTTPClient {
 		Scheme:      u.Scheme,
 		ContentType: "application/json",
 		HTTPClient: &http.Client{
-			Timeout: 2 * time.Second,
+			Timeout: 10 * time.Second,
 		},
 	}
 }
